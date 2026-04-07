@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TempTrader v2.9.1</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --surface3: #242840;
+    --border: #2a2e45;
+    --border2: #363b58;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --success: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --text: #e8eaf6;
+    --text2: #8b90b8;
+    --text3: #565b7a;
+    --font: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .logo-text { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+  .logo-ver { font-size: 10px; color: var(--text3); margin-left: 4px; }
+  .clock-bar { display: flex; gap: 16px; font-size: 11px; color: var(--text2); }
+  .clock-item span { color: var(--text); font-weight: 600; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-family: var(--font);
+    color: var(--text2);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CONTENT */
+  .content { padding: 16px; max-width: 900px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* GRID LAYOUTS */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .card-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* FORM ELEMENTS */
+  label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; letter-spacing: 0.3px; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; line-height: 1.5; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--surface3); border-color: var(--accent); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3d7af0; }
+  .btn-success { background: #166534; border-color: #22c55e; color: var(--success); }
+  .btn-warn { background: #78350f; border-color: var(--warn); color: var(--warn); }
+  .btn-danger { background: #7f1d1d; border-color: var(--danger); color: var(--danger); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-block { width: 100%; justify-content: center; }
+
+  /* STATUS BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-green { background: #14532d; color: var(--success); border: 1px solid #166534; }
+  .badge-red { background: #7f1d1d; color: var(--danger); border: 1px solid #991b1b; }
+  .badge-warn { background: #78350f; color: var(--warn); border: 1px solid #92400e; }
+  .badge-blue { background: #1e3a5f; color: var(--accent); border: 1px solid #1d4ed8; }
+  .badge-info { background: #164e63; color: var(--info); border: 1px solid #0e7490; }
+  .badge-purple { background: #3b0764; color: #a855f7; border: 1px solid #7c3aed; }
+
+  /* DIVIDERS */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+  /* METRIC DISPLAYS */
+  .metric { text-align: center; }
+  .metric-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .metric-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+  /* METAR DISPLAY */
+  .metar-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    border-left: 3px solid var(--border);
+  }
+  .metar-line.latest { border-left-color: var(--accent); }
+  .metar-time { color: var(--text3); min-width: 60px; font-size: 11px; }
+  .metar-temp { font-weight: 700; font-size: 15px; }
+  .metar-temp.up { color: var(--danger); }
+  .metar-temp.down { color: var(--info); }
+  .metar-temp.flat { color: var(--text2); }
+  .metar-wind { color: var(--text2); font-size: 11px; }
+  .metar-trend { margin-left: auto; font-size: 18px; }
+
+  /* SIGNAL BOX */
+  .signal-box {
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .signal-hold { background: #14532d; color: var(--success); border: 1px solid #166534; }
+  .signal-sell { background: #7f1d1d; color: var(--danger); border: 1px solid #991b1b; }
+  .signal-watch { background: #78350f; color: var(--warn); border: 1px solid #92400e; }
+  .signal-wait { background: #1e3a5f; color: var(--accent); border: 1px solid #1d4ed8; }
+
+  /* AFD BOX */
+  .afd-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.7;
+    min-height: 80px;
+    white-space: pre-wrap;
+    font-family: var(--font);
+  }
+
+  /* POSITION TRACKER */
+  .position-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    gap: 10px;
+  }
+  .position-entry:hover { border-color: var(--border2); }
+  .pos-city { font-weight: 700; color: var(--text); min-width: 50px; }
+  .pos-bracket { color: var(--info); }
+  .pos-contracts { color: var(--text2); font-size: 11px; }
+  .pos-entry-price { color: var(--warn); }
+  .pos-pnl.profit { color: var(--success); }
+  .pos-pnl.loss { color: var(--danger); }
+
+  /* SELL TARGET */
+  .sell-target {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 5px;
+    margin-bottom: 6px;
+  }
+  .sell-target-city { color: var(--text2); font-size: 11px; }
+  .sell-target-price { font-size: 18px; font-weight: 700; color: var(--warn); }
+  .sell-target-type { font-size: 10px; color: var(--text3); }
+
+  /* SOURCES */
+  .source-city {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .source-city-header {
+    background: var(--surface2);
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .source-city-icao { font-size: 10px; color: var(--text3); }
+  .source-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 12px;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  .source-link:hover { background: var(--surface2); color: var(--accent); }
+  .source-link:last-child { border-bottom: none; }
+  .source-link-icon { font-size: 11px; color: var(--text3); }
+  .copy-btn-small {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: var(--font);
+    font-size: 10px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn-small:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn-small.copied { border-color: var(--success); color: var(--success); }
+
+  /* ALERT BOX */
+  .alert {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .alert-warn { background: #78350f30; border: 1px solid #92400e; color: var(--warn); }
+  .alert-danger { background: #7f1d1d30; border: 1px solid #991b1b; color: var(--danger); }
+  .alert-success { background: #14532d30; border: 1px solid #166534; color: var(--success); }
+  .alert-info { background: #164e6330; border: 1px solid #0e7490; color: var(--info); }
+
+  /* CONFIDENCE */
+  .confidence-bar-wrap { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+  .confidence-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  /* STALE INDICATOR */
+  .stale-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .stale-fresh { background: #14532d; color: var(--success); }
+  .stale-old { background: #78350f; color: var(--warn); }
+  .stale-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* FIELD ROW */
+  .field-row { margin-bottom: 10px; }
+  .field-inline { display: flex; gap: 10px; align-items: flex-end; }
+  .field-inline > * { flex: 1; }
+
+  /* NYC celsius display */
+  .celsius-display {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .celsius-val { font-size: 20px; font-weight: 700; }
+  .celsius-f { font-size: 13px; color: var(--text2); margin-left: 6px; }
+  .celsius-boundary { color: var(--danger); font-size: 11px; font-weight: 700; margin-top: 4px; }
+  .celsius-safe { color: var(--success); font-size: 11px; margin-top: 4px; }
+
+  /* SECTION HEADER */
+  .section-header {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text3);
+    margin-bottom: 8px;
+    margin-top: 16px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header:first-child { margin-top: 0; }
+
+  /* INPUT TAB COLUMNS */
+  .input-main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) {
+    .input-main { grid-template-columns: 1fr; }
+    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+  }
+
+  /* PEAK TABLE */
+  .peak-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .peak-row:last-child { border: none; }
+
+  /* TOP STATS BAR */
+  .stats-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 12px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-pill-lbl { color: var(--text3); }
+  .stat-pill-val { color: var(--text); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">T</div>
+    <div>
+      <span class="logo-text">TempTrader</span>
+      <span class="logo-ver">v2.9.1</span>
+    </div>
+  </div>
+  <div class="clock-bar" id="clockBar">
+    <div class="stat-pill">
+      <span class="stat-pill-lbl">PST</span>
+      <span class="stat-pill-val" id="clockPST">--:--</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill-lbl">EST</span>
+      <span class="stat-pill-val" id="clockEST">--:--</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill-lbl">UTC</span>
+      <span class="stat-pill-val" id="clockUTC">--:--</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill-lbl">CST</span>
+      <span class="stat-pill-val" id="clockCST">--:--</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill-lbl">MST</span>
+      <span class="stat-pill-val" id="clockMST">--:--</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('input')">① Input</button>
+  <button class="tab" onclick="showTab('analysis')">② Analysis</button>
+  <button class="tab" onclick="showTab('monitor')">③ Monitor</button>
+  <button class="tab" onclick="showTab('sources')">④ Sources</button>
+</div>
+
+<!-- ===== TAB 1: INPUT ===== -->
+<div id="tab-input" class="panel active content">
+
+  <div class="section-header">City & Data Pull</div>
+  <div class="input-main">
+    <div>
+      <div class="field-row">
+        <label>ICAO Station ID</label>
+        <select id="icaoSelect" onchange="onCityChange()">
+          <option value="KNYC">KNYC — New York (Central Park)</option>
+          <option value="KLAX">KLAX — Los Angeles</option>
+          <option value="KMDW">KMDW — Chicago (Midway)</option>
+          <option value="KMIA">KMIA — Miami</option>
+          <option value="KSEA">KSEA — Seattle</option>
+          <option value="KSFO">KSFO — San Francisco</option>
+          <option value="KAUS">KAUS — Austin</option>
+          <option value="KHOU">KHOU — Houston (Hobby)</option>
+          <option value="KDFW">KDFW — Dallas/Fort Worth</option>
+          <option value="KDCA">KDCA — Washington DC (Reagan)</option>
+          <option value="KBOS">KBOS — Boston</option>
+          <option value="KPHL">KPHL — Philadelphia</option>
+          <option value="KDEN">KDEN — Denver</option>
+          <option value="KPHX">KPHX — Phoenix</option>
+          <option value="KLAS">KLAS — Las Vegas</option>
+          <option value="KMSP">KMSP — Minneapolis</option>
+          <option value="KATL">KATL — Atlanta</option>
+          <option value="KSAT">KSAT — San Antonio</option>
+          <option value="KMSY">KMSY — New Orleans</option>
+          <option value="KOKC">KOKC — Oklahoma City</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field-inline">
+          <div>
+            <label>City Type</label>
+            <select id="cityType">
+              <option value="smooth">Smooth (PHX/DFW/LAS)</option>
+              <option value="marine">Marine Layer (LAX/SFO/SEA)</option>
+              <option value="coastal">Coastal Swing (BOS/NYC/PHL)</option>
+              <option value="storm">Storm City (MIA/MSY)</option>
+            </select>
+          </div>
+          <div>
+            <label>Kalshi Model (°F)</label>
+            <input type="number" id="kalshiModel" placeholder="e.g. 83.9" step="0.1">
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-inline">
+          <div>
+            <label>Bracket Entered</label>
+            <input type="text" id="bracketEntered" placeholder="e.g. 82-83°">
+          </div>
+          <div>
+            <label>Entry Price (¢)</label>
+            <input type="number" id="entryPrice" placeholder="e.g. 32" step="1" min="1" max="99">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="field-row">
+        <label>Data Fetch</label>
+        <div style="display:flex; gap:8px; flex-direction:column;">
+          <button class="btn btn-primary btn-block" onclick="fetchMETAR()">⬇ Pull METAR + TAF</button>
+          <div id="metarStatus" style="font-size:11px; color:var(--text3); text-align:center;"></div>
+        </div>
+      </div>
+      <div id="metarPreview" class="afd-box" style="min-height:60px; margin-top:8px; font-size:11px; color:var(--text2);">No data pulled yet.</div>
+      <div id="tafPreview" class="afd-box" style="min-height:40px; margin-top:8px; font-size:11px; color:var(--text2);">TAF: —</div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:16px;">Position Tracker</div>
+  <div id="positionList"></div>
+  <div class="field-inline" style="gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+    <input type="text" id="posCity" placeholder="NYC" style="max-width:70px;">
+    <input type="text" id="posBracket" placeholder="82-83°" style="max-width:80px;">
+    <input type="number" id="posContracts" placeholder="Contracts" style="max-width:100px;">
+    <input type="number" id="posEntryPrice" placeholder="Entry ¢" style="max-width:80px;">
+    <input type="text" id="posTime" placeholder="Entered 9:30am" style="max-width:130px;">
+    <input type="number" id="posCurrentPrice" placeholder="Current ¢" style="max-width:90px;">
+    <button class="btn btn-success btn-sm" onclick="addPosition()">+ Add</button>
+    <button class="btn btn-sm" onclick="clearPositions()">Clear All</button>
+  </div>
+
+</div>
+
+<!-- ===== TAB 2: ANALYSIS ===== -->
+<div id="tab-analysis" class="panel content">
+
+  <div class="grid2" style="gap:12px; margin-bottom:12px;">
+    <div>
+      <div class="section-header">AFD Paste (Manual)</div>
+      <textarea id="afdPaste" rows="7" placeholder="Paste NWS Area Forecast Discussion text here..." style="width:100%; font-size:11px;"></textarea>
+      <button class="btn btn-primary btn-block" style="margin-top:8px;" onclick="analyzeAFD()">Analyze AFD</button>
+    </div>
+    <div>
+      <div class="section-header">AFD Analysis Results</div>
+      <div id="afdResults">
+        <div style="color:var(--text3); font-size:12px; padding:12px 0;">Paste AFD text and click Analyze.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="grid2" style="gap:12px;">
+    <div>
+      <div class="section-header">Sell Target Calculator</div>
+      <div id="sellTargetDisplay">
+        <div class="field-row">
+          <label>City Type (for sell target)</label>
+          <select id="sellTargetCityType" onchange="updateSellTarget()">
+            <option value="smooth">Smooth Sailing (PHX/DFW/LAS) → 88–92¢</option>
+            <option value="marine">Marine Layer (LAX/SFO/SEA) → 75¢</option>
+            <option value="coastal">Coastal Swing (BOS/NYC/PHL) → 88¢</option>
+            <option value="storm">Storm City (MIA/MSY) → 65¢</option>
+          </select>
+        </div>
+        <div class="sell-target" style="margin-top:8px;">
+          <div>
+            <div class="sell-target-city" id="sellTargetCityName">Smooth Sailing</div>
+            <div class="sell-target-type">Sell target</div>
+          </div>
+          <div class="sell-target-price" id="sellTargetVal">88–92¢</div>
+        </div>
+        <div id="sellTargetNote" style="font-size:11px; color:var(--text2); margin-top:6px;"></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-header">Time-to-Peak (Local PST/PDT)</div>
+      <div id="peakTimingDisplay">
+        <div class="peak-row"><span style="color:var(--text2)">KLAX (Marine Layer)</span><span style="color:var(--info)">2:00–3:00 PM PDT</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KPHX / KLAS</span><span style="color:var(--danger)">3:00–4:00 PM MST</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KDFW</span><span style="color:var(--danger)">2:30–4:00 PM CDT</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KNYC (Central Park)</span><span style="color:var(--warn)">2:00–3:00 PM EDT</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KBOS</span><span style="color:var(--warn)">1:00–2:30 PM EDT</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KMIA / KMSY</span><span style="color:var(--success)">1:00–2:00 PM EDT (sell before)</span></div>
+        <div class="peak-row"><span style="color:var(--text2)">KSFO</span><span style="color:var(--info)">3:00–4:00 PM PDT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-header">KNYC Celsius Precision Tool</div>
+  <div class="grid2" style="gap:12px;">
+    <div>
+      <label>Raw METAR RMK T-field (e.g. T02610128)</label>
+      <div class="field-inline">
+        <input type="text" id="tFieldInput" placeholder="T02610128" style="max-width:160px;">
+        <input type="number" id="bracketBoundaryInput" placeholder="Boundary °F (e.g. 80)" style="max-width:160px;">
+        <button class="btn btn-primary btn-sm" onclick="parseTField()">Parse</button>
+      </div>
+    </div>
+    <div id="tFieldResult" class="celsius-display" style="display:none;"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-header">Confidence Score</div>
+  <div id="confidenceDisplay">
+    <div style="color:var(--text3); font-size:12px;">Analyze AFD above to see confidence score.</div>
+  </div>
+
+</div>
+
+<!-- ===== TAB 3: MONITOR ===== -->
+<div id="tab-monitor" class="panel content">
+
+  <div class="grid2" style="gap:12px; margin-bottom:12px;">
+    <div class="card">
+      <div class="card-title">Active Trade</div>
+      <div class="field-row">
+        <div class="field-inline">
+          <div>
+            <label>Station</label>
+            <select id="monitorStation">
+              <option value="KNYC">KNYC — New York</option>
+              <option value="KLAX">KLAX — Los Angeles</option>
+              <option value="KMDW">KMDW — Chicago (Midway)</option>
+              <option value="KMIA">KMIA — Miami</option>
+              <option value="KSEA">KSEA — Seattle</option>
+              <option value="KSFO">KSFO — San Francisco</option>
+              <option value="KAUS">KAUS — Austin</option>
+              <option value="KHOU">KHOU — Houston (Hobby)</option>
+              <option value="KDFW">KDFW — Dallas/FW</option>
+              <option value="KDCA">KDCA — Washington DC</option>
+              <option value="KBOS">KBOS — Boston</option>
+              <option value="KPHL">KPHL — Philadelphia</option>
+              <option value="KDEN">KDEN — Denver</option>
+              <option value="KPHX">KPHX — Phoenix</option>
+              <option value="KLAS">KLAS — Las Vegas</option>
+              <option value="KMSP">KMSP — Minneapolis</option>
+              <option value="KATL">KATL — Atlanta</option>
+              <option value="KSAT">KSAT — San Antonio</option>
+              <option value="KMSY">KMSY — New Orleans</option>
+              <option value="KOKC">KOKC — Oklahoma City</option>
+            </select>
+          </div>
+          <div>
+            <label>City Type</label>
+            <select id="monitorCityType">
+              <option value="smooth">Smooth</option>
+              <option value="marine">Marine</option>
+              <option value="coastal">Coastal</option>
+              <option value="storm">Storm</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-inline">
+          <div>
+            <label>Bracket (e.g. 82-83)</label>
+            <input type="text" id="monitorBracket" placeholder="82-83">
+          </div>
+          <div>
+            <label>Bracket Low °F</label>
+            <input type="number" id="monitorBracketLow" placeholder="82">
+          </div>
+          <div>
+            <label>Bracket High °F</label>
+            <input type="number" id="monitorBracketHigh" placeholder="83">
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="fetchMonitorData()" style="margin-top:4px;">⬇ Refresh METAR</button>
+      <div id="monitorStatus" style="font-size:11px; color:var(--text3); text-align:center; margin-top:6px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Signal</div>
+      <div id="signalDisplay" class="signal-box signal-wait">—</div>
+      <div id="signalNote" style="font-size:11px; color:var(--text2); margin-top:8px; line-height:1.6;"></div>
+      <div id="reversalAlert" style="display:none;" class="alert alert-danger" style="margin-top:8px;">
+        <span class="alert-icon">⚠</span>
+        <span>PEAK REVERSAL DETECTED — temp dropped 2°F+ over 3 readings with increasing gusts. Consider DUMP &amp; JUMP.</span>
+      </div>
+      <div id="nycBoundaryAlert" style="display:none;" class="alert alert-warn" style="margin-top:8px;">
+        <span class="alert-icon">⚠</span>
+        <span id="nycBoundaryMsg">NYC boundary risk detected from T-field.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">METAR History (Last 3 Readings)</div>
+  <div id="metar-history">
+    <div style="color:var(--text3); font-size:12px; padding:8px 0;">No readings yet. Click Refresh METAR above.</div>
+  </div>
+
+  <div class="section-header" style="margin-top:16px;">Manual Reading Entry (5-min Tabular)</div>
+  <div class="field-inline" style="flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+    <input type="text" id="manualTime" placeholder="9:35am PDT" style="max-width:120px;">
+    <input type="number" id="manualTemp" placeholder="°F" style="max-width:80px;" step="0.1">
+    <input type="text" id="manualWind" placeholder="Wind (e.g. SW 12G18)" style="max-width:160px;">
+    <button class="btn btn-sm" onclick="addManualReading()">+ Add Reading</button>
+    <button class="btn btn-sm btn-danger" onclick="clearReadings()">Clear</button>
+  </div>
+  <div id="manualHistory"></div>
+
+  <div class="section-header" style="margin-top:16px;">Gust Contamination Check</div>
+  <div class="card" style="font-size:12px; color:var(--text2); line-height:1.8;">
+    <b style="color:var(--text);">Rule:</b> A single spike from wind gusts is NOT a bracket change.<br>
+    Wait for <b style="color:var(--warn);">3 consecutive readings</b> at the new temp level before acting.<br>
+    Single gust spike = model overreaction, not a real move.
+    <hr class="divider">
+    <span id="gustCheck">Enter 3 readings above to auto-check gust contamination.</span>
+  </div>
+
+</div>
+
+<!-- ===== TAB 4: SOURCES ===== -->
+<div id="tab-sources" class="panel content">
+
+  <div id="sourcesContainer"></div>
+
+</div>
+
+<script>
+// ============================================================
+// CITY CONFIGS
+// ============================================================
+const CITIES = {
+  KNYC: {
+    name: 'New York (Central Park)', icao: 'KNYC', cli: 'CLINYC', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=OKX&issuedby=OKX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KNYC&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KNYC&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ny/new-york-city/KNYC/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=New+York+City&state=NY&site=OKX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KNYC.TXT',
+    mesonet: 'https://www.nysmesonet.org/weather/requestedData?siteid=MANH',
+    note: 'Resolves on NWS CLI Central Park (KNYC ASOS). NOT Times Square, NOT JFK.'
+  },
+  KLAX: {
+    name: 'Los Angeles', icao: 'KLAX', cli: 'CLILAX', type: 'marine',
+    afd: 'https://forecast.weather.gov/product.php?site=LOX&issuedby=LOX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KLAX&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KLAX&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ca/los-angeles/KLAX/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Los+Angeles&state=CA&site=LOX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KLAX.TXT',
+    note: 'Marine layer clears 9-11am. Check 5-min tabular before entry. If temp at bracket bottom by 9am — buy next bracket up.'
+  },
+  KMDW: {
+    name: 'Chicago (Midway)', icao: 'KMDW', cli: 'CLIMDW', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=LOT&issuedby=LOT&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KMDW&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KMDW&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/il/chicago/KMDW/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Chicago&state=IL&site=LOT',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KMDW.TXT',
+    note: 'Resolves on Midway (KMDW), NOT O\'Hare. ENE winds = lake suppression on highs.'
+  },
+  KMIA: {
+    name: 'Miami', icao: 'KMIA', cli: 'CLIMIA', type: 'storm',
+    afd: 'https://forecast.weather.gov/product.php?site=MFL&issuedby=MFL&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KMIA&parm=TMPF&span=36&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/fl/miami/KMIA/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Miami&state=FL&site=MFL',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KMIA.TXT'
+  },
+  KSEA: {
+    name: 'Seattle', icao: 'KSEA', cli: 'CLISEA', type: 'marine',
+    afd: 'https://forecast.weather.gov/product.php?site=SEW&issuedby=SEW&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KSEA&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KSEA&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/wa/seattle/KSEA/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Seattle&state=WA&site=SEW',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KSEA.TXT'
+  },
+  KSFO: {
+    name: 'San Francisco', icao: 'KSFO', cli: 'CLISFO', type: 'marine',
+    afd: 'https://forecast.weather.gov/product.php?site=MTR&issuedby=MTR&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KSFO&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KSFO&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ca/san-francisco/KSFO/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=San+Francisco&state=CA&site=MTR',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KSFO.TXT'
+  },
+  KAUS: {
+    name: 'Austin', icao: 'KAUS', cli: 'CLIAUS', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=EWX&issuedby=EWX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KAUS&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KAUS&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/tx/austin/KAUS/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Austin&state=TX&site=EWX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KAUS.TXT'
+  },
+  KHOU: {
+    name: 'Houston (Hobby)', icao: 'KHOU', cli: 'CLIHOU', type: 'storm',
+    afd: 'https://forecast.weather.gov/product.php?site=HGX&issuedby=HGX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KHOU&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KHOU&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/tx/houston/KHOU/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Houston&state=TX&site=HGX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KHOU.TXT',
+    note: 'Resolves on Hobby (KHOU), NOT IAH. Storm city rules — sell at 65¢.'
+  },
+  KDFW: {
+    name: 'Dallas/Fort Worth', icao: 'KDFW', cli: 'CLIDFW', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=FWD&issuedby=FWD&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KDFW&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KDFW&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/tx/dallas/KDFW/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Dallas&state=TX&site=FWD',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KDFW.TXT'
+  },
+  KDCA: {
+    name: 'Washington DC (Reagan)', icao: 'KDCA', cli: 'CLIDCA', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=LWX&issuedby=LWX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KDCA&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KDCA&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/dc/washington/KDCA/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Washington&state=DC&site=LWX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KDCA.TXT',
+    note: 'Resolves on Reagan National (KDCA). Urban heat island — runs warmer than suburbs.'
+  },
+  KBOS: {
+    name: 'Boston', icao: 'KBOS', cli: 'CLIBOS', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=BOX&issuedby=BOX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KBOS&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KBOS&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ma/boston/KBOS/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Boston&state=MA&site=BOX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KBOS.TXT'
+  },
+  KPHL: {
+    name: 'Philadelphia', icao: 'KPHL', cli: 'CLIPHL', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=PHI&issuedby=PHI&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KPHL&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KPHL&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/pa/philadelphia/KPHL/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Philadelphia&state=PA&site=PHI',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KPHL.TXT'
+  },
+  KDEN: {
+    name: 'Denver', icao: 'KDEN', cli: 'CLIDEN', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=BOU&issuedby=BOU&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KDEN&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KDEN&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/co/denver/KDEN/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Denver&state=CO&site=BOU',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KDEN.TXT',
+    note: 'High elevation — chinook winds can cause dramatic swings. Check AFD for downslope language.'
+  },
+  KPHX: {
+    name: 'Phoenix', icao: 'KPHX', cli: 'CLIPHX', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=PSR&issuedby=PSR&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KPHX&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KPHX&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/az/phoenix/KPHX/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Phoenix&state=AZ&site=PSR',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KPHX.TXT'
+  },
+  KLAS: {
+    name: 'Las Vegas', icao: 'KLAS', cli: 'CLILAS', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=VEF&issuedby=VEF&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KLAS&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KLAS&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/nv/las-vegas/KLAS/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Las+Vegas&state=NV&site=VEF',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KLAS.TXT'
+  },
+  KMSP: {
+    name: 'Minneapolis', icao: 'KMSP', cli: 'CLIMSP', type: 'coastal',
+    afd: 'https://forecast.weather.gov/product.php?site=MPX&issuedby=MPX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KMSP&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KMSP&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/mn/minneapolis/KMSP/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Minneapolis&state=MN&site=MPX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KMSP.TXT'
+  },
+  KATL: {
+    name: 'Atlanta', icao: 'KATL', cli: 'CLIATL', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=FFC&issuedby=FFC&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KATL&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KATL&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ga/atlanta/KATL/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Atlanta&state=GA&site=FFC',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KATL.TXT'
+  },
+  KSAT: {
+    name: 'San Antonio', icao: 'KSAT', cli: 'CLISAT', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=EWX&issuedby=EWX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KSAT&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KSAT&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/tx/san-antonio/KSAT/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=San+Antonio&state=TX&site=EWX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KSAT.TXT'
+  },
+  KMSY: {
+    name: 'New Orleans', icao: 'KMSY', cli: 'CLIMSY', type: 'storm',
+    afd: 'https://forecast.weather.gov/product.php?site=LIX&issuedby=LIX&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KMSY&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KMSY&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/la/new-orleans/KMSY/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=New+Orleans&state=LA&site=LIX',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KMSY.TXT'
+  },
+  KOKC: {
+    name: 'Oklahoma City', icao: 'KOKC', cli: 'CLIOKC', type: 'smooth',
+    afd: 'https://forecast.weather.gov/product.php?site=OUN&issuedby=OUN&product=AFD',
+    tabular: 'https://www.weather.gov/wrh/timeseries?site=KOKC&parm=TMPF&span=36&t=0&hour=0',
+    fiveMin: 'https://www.weather.gov/wrh/timeseries?site=KOKC&parm=TMPF&span=6&t=0&hour=0',
+    wunderground: 'https://www.wunderground.com/hourly/us/ok/oklahoma-city/KOKC/date/',
+    nwsPoint: 'https://forecast.weather.gov/MapClick.php?CityName=Oklahoma+City&state=OK&site=OUN',
+    metar: 'https://tgftp.nws.noaa.gov/data/observations/metar/stations/KOKC.TXT'
+  }
+};
+
+// Sell targets per type
+const SELL_TARGETS = {
+  smooth: { label: 'Smooth Sailing (PHX/DFW/LAS)', val: '88–92¢', note: 'NWS forecast is reliable. Hold for max payout. Take profit at 88–92¢.' },
+  marine: { label: 'Marine Layer (LAX/SFO/SEA)', val: '75¢', note: 'Marine layer unpredictability caps upside. Exit hedge positions at 75¢.' },
+  coastal: { label: 'Coastal Swing (BOS/NYC/PHL)', val: '88¢', note: 'Good reliability but coastal variance exists. Target 88¢, never hold to 99¢.' },
+  storm: { label: 'Storm City (MIA/MSY)', val: '65¢', note: '⚠ HARD CEILING. Afternoon convection can bust brackets instantly. Always sell at 65¢, no exceptions.' }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let positions = [];
+let metarHistory = []; // For monitor tab
+let manualReadings = [];
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'sources') renderSources();
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const fmt = (tz) => now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: tz });
+  document.getElementById('clockPST').textContent = fmt('America/Los_Angeles');
+  document.getElementById('clockEST').textContent = fmt('America/New_York');
+  document.getElementById('clockUTC').textContent = now.toUTCString().slice(17, 22) + ' UTC';
+  document.getElementById('clockCST').textContent = fmt('America/Chicago');
+  document.getElementById('clockMST').textContent = fmt('America/Denver');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// CITY CHANGE
+// ============================================================
+function onCityChange() {
+  const icao = document.getElementById('icaoSelect').value;
+  const city = CITIES[icao];
+  if (!city) return;
+  const typeMap = { smooth: 0, marine: 1, coastal: 2, storm: 3 };
+  document.getElementById('cityType').selectedIndex = typeMap[city.type] || 0;
+}
+
+// ============================================================
+// METAR FETCH (aviationweather.gov)
+// ============================================================
+async function fetchMETAR() {
+  const icao = document.getElementById('icaoSelect').value;
+  const statusEl = document.getElementById('metarStatus');
+  const previewEl = document.getElementById('metarPreview');
+  const tafEl = document.getElementById('tafPreview');
+  statusEl.textContent = 'Fetching...';
+  previewEl.textContent = 'Loading...';
+  tafEl.textContent = 'Loading...';
+
+  try {
+    // Try aviationweather.gov first
+    const url = `https://aviationweather.gov/api/data/metar?ids=${icao}&format=decoded&taf=true`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+
+    let metarPart = text;
+    let tafPart = '';
+    if (text.includes('TAF ')) {
+      const tafIdx = text.indexOf('TAF ');
+      metarPart = text.slice(0, tafIdx).trim();
+      tafPart = text.slice(tafIdx).trim();
+    }
+
+    previewEl.textContent = metarPart || 'No METAR data returned.';
+    tafEl.textContent = tafPart ? tafPart.slice(0, 300) + (tafPart.length > 300 ? '...' : '') : 'No TAF data.';
+
+    // Try to parse temp from decoded
+    const tempMatch = text.match(/Temperature:\s*([\d.]+)\s*C\s*\(([\d.]+)\s*F\)/i);
+    if (tempMatch) {
+      const tempF = parseFloat(tempMatch[2]);
+      const tempC = parseFloat(tempMatch[1]);
+      statusEl.innerHTML = `<span style="color:var(--success);">✓ Data received</span> — Temp: <b style="color:var(--warn);">${tempF.toFixed(1)}°F (${tempC.toFixed(1)}°C)</b> <span class="stale-badge stale-fresh"><span class="stale-dot"></span>Live</span>`;
+
+      // If NYC, auto-check for T-field in raw
+      if (icao === 'KNYC') {
+        const tFieldMatch = text.match(/T\d{8}/);
+        if (tFieldMatch) {
+          document.getElementById('tFieldInput').value = tFieldMatch[0];
+        }
+      }
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--success);">✓ Data received</span> — <span class="stale-badge stale-fresh"><span class="stale-dot"></span>Live</span>`;
+    }
+  } catch(e) {
+    // Fallback message
+    previewEl.textContent = `CORS or network error: ${e.message}\n\nTry the SOURCES tab for direct METAR links to tgftp.nws.noaa.gov.`;
+    tafEl.textContent = 'Unable to fetch TAF.';
+    statusEl.innerHTML = `<span style="color:var(--danger);">⚠ Fetch failed — use Sources tab for manual lookup</span>`;
+  }
+}
+
+// ============================================================
+// POSITIONS
+// ============================================================
+function addPosition() {
+  const city = document.getElementById('posCity').value.trim().toUpperCase();
+  const bracket = document.getElementById('posBracket').value.trim();
+  const contracts = parseInt(document.getElementById('posContracts').value) || 0;
+  const entry = parseFloat(document.getElementById('posEntryPrice').value) || 0;
+  const time = document.getElementById('posTime').value.trim();
+  const current = parseFloat(document.getElementById('posCurrentPrice').value) || null;
+
+  if (!city || !bracket) return;
+  positions.push({ city, bracket, contracts, entry, time, current });
+
+  document.getElementById('posCity').value = '';
+  document.getElementById('posBracket').value = '';
+  document.getElementById('posContracts').value = '';
+  document.getElementById('posEntryPrice').value = '';
+  document.getElementById('posTime').value = '';
+  document.getElementById('posCurrentPrice').value = '';
+
+  renderPositions();
+}
+
+function removePosition(i) {
+  positions.splice(i, 1);
+  renderPositions();
+}
+
+function clearPositions() {
+  positions = [];
+  renderPositions();
+}
+
+function renderPositions() {
+  const el = document.getElementById('positionList');
+  if (!positions.length) {
+    el.innerHTML = '<div style="color:var(--text3); font-size:12px; padding:6px 0; margin-bottom:8px;">No positions. Add one below.</div>';
+    return;
+  }
+  el.innerHTML = positions.map((p, i) => {
+    let pnlHtml = '';
+    if (p.current !== null && p.entry) {
+      const pnl = (p.current - p.entry) * p.contracts;
+      const pnlClass = pnl >= 0 ? 'profit' : 'loss';
+      const sign = pnl >= 0 ? '+' : '';
+      pnlHtml = `<span class="pos-pnl ${pnlClass}">${sign}$${(pnl * 0.01 * 100).toFixed(2)}</span>`;
+    }
+    return `<div class="position-entry">
+      <span class="pos-city">${p.city}</span>
+      <span class="pos-bracket">${p.bracket}</span>
+      <span class="pos-contracts">${p.contracts} contracts</span>
+      <span class="pos-entry-price">${p.entry}¢</span>
+      ${p.current ? `<span style="color:var(--text2); font-size:11px;">now ${p.current}¢</span>` : ''}
+      ${pnlHtml}
+      <span style="color:var(--text3); font-size:11px;">${p.time}</span>
+      <button class="btn btn-sm btn-danger" style="padding:2px 8px; font-size:10px;" onclick="removePosition(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+renderPositions();
+
+// ============================================================
+// AFD ANALYSIS
+// ============================================================
+function analyzeAFD() {
+  const text = document.getElementById('afdPaste').value.toLowerCase();
+  const resultsEl = document.getElementById('afdResults');
+  const confEl = document.getElementById('confidenceDisplay');
+
+  if (!text.trim()) {
+    resultsEl.innerHTML = '<div style="color:var(--danger); font-size:12px;">No AFD text pasted.</div>';
+    return;
+  }
+
+  const flags = [];
+  let confidence = 60;
+  let swing = false;
+
+  // Swing day checks
+  const swingKeywords = ['large temperature swings', 'backdoor front', 'wide temp range', 'large swing', 'temperature swing', 'wide diurnal', 'wide range', 'unseasonably'];
+  swingKeywords.forEach(kw => {
+    if (text.includes(kw)) {
+      swing = true;
+      flags.push({ type: 'warn', msg: `⚠ SWING DAY signal: "${kw}" detected — consider threshold brackets`, detail: 'Threshold brackets only need to beat one number. Avoid narrow 2° brackets on swing days.' });
+    }
+  });
+
+  // Storm risk
+  const stormKeywords = ['afternoon storms', 'afternoon thunderstorm', 'convection', 'scattered showers', 'isolated storms', 'pop afternoon'];
+  stormKeywords.forEach(kw => {
+    if (text.includes(kw)) {
+      flags.push({ type: 'danger', msg: `⛈ STORM RISK: "${kw}" — storm city rules apply`, detail: 'If MIA/MSY: sell at 65¢ hard ceiling. Do not hold past noon.' });
+      confidence -= 15;
+    }
+  });
+
+  // Marine layer
+  const marineKeywords = ['marine layer', 'low clouds', 'stratus', 'onshore flow', 'eddy'];
+  marineKeywords.forEach(kw => {
+    if (text.includes(kw)) {
+      flags.push({ type: 'info', msg: `🌫 Marine layer: "${kw}" detected — check 5-min tabular before LAX entry`, detail: 'Marine layer cities can swing 8–10°F before noon. If temp already at bracket bottom by 9am, buy next bracket up.' });
+      confidence -= 10;
+    }
+  });
+
+  // Cold front / backdoor
+  if (text.includes('cold front') || text.includes('backdoor')) {
+    flags.push({ type: 'warn', msg: '❄ Cold front or backdoor front language — directional uncertainty', detail: 'Backdoor fronts can stall or retreat. Prefer threshold brackets.' });
+    confidence -= 10;
+    swing = true;
+  }
+
+  // High pressure / clear = smooth
+  if (text.includes('high pressure') || text.includes('ridge') || text.includes('sunny') || text.includes('clear')) {
+    flags.push({ type: 'success', msg: '☀ High pressure/ridge/clear: stable conditions favorable', detail: 'Smooth sailing city rules apply. Buy the bracket NWS forecast falls in — no defensive hedging.' });
+    confidence += 10;
+  }
+
+  // Wind
+  if (text.includes('gusty') || text.includes('breezy') || text.includes('wind advisory')) {
+    flags.push({ type: 'warn', msg: '💨 Wind advisory language — gust contamination risk on 5-min tabular', detail: 'Wait for 3 consecutive readings at new level before acting on any spike.' });
+    confidence -= 5;
+  }
+
+  confidence = Math.max(10, Math.min(95, confidence));
+  const confColor = confidence >= 70 ? 'var(--success)' : confidence >= 45 ? 'var(--warn)' : 'var(--danger)';
+  const confLabel = confidence >= 70 ? 'High' : confidence >= 45 ? 'Medium' : 'Low';
+
+  let html = '';
+  if (swing) {
+    html += `<div class="alert alert-warn" style="margin-bottom:10px;"><span class="alert-icon">⚠</span><div><b>SWING DAY — Consider threshold brackets</b><br><span style="font-size:11px;">Threshold brackets are cheap (&lt;25¢) and only need to beat one number. Skip narrow 2° brackets on swing days.</span></div></div>`;
+  }
+
+  if (flags.length === 0) {
+    html += '<div style="color:var(--text2); font-size:12px; padding:6px 0;">No significant flags detected. AFD appears neutral.</div>';
+  } else {
+    flags.forEach(f => {
+      const cls = f.type === 'danger' ? 'alert-danger' : f.type === 'warn' ? 'alert-warn' : f.type === 'success' ? 'alert-success' : 'alert-info';
+      html += `<div class="alert ${cls}" style="flex-direction:column; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:12px;">${f.msg}</div>
+        <div style="font-size:11px; margin-top:3px; opacity:0.85;">${f.detail}</div>
+      </div>`;
+    });
+  }
+
+  resultsEl.innerHTML = html;
+
+  confEl.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <span style="font-size:11px; color:var(--text2);">Confidence Score</span>
+      <span style="font-size:18px; font-weight:700; color:${confColor};">${confidence}% — ${confLabel}</span>
+    </div>
+    <div class="confidence-bar-wrap">
+      <div class="confidence-bar" style="width:${confidence}%; background:${confColor};"></div>
+    </div>
+    <div style="font-size:10px; color:var(--text3); margin-top:6px;">Based on ${flags.length} AFD signal(s) detected. Adjust position sizing accordingly.</div>
+  `;
+}
+
+// ============================================================
+// SELL TARGET
+// ============================================================
+function updateSellTarget() {
+  const type = document.getElementById('sellTargetCityType').value;
+  const t = SELL_TARGETS[type];
+  document.getElementById('sellTargetCityName').textContent = t.label;
+  document.getElementById('sellTargetVal').textContent = t.val;
+  document.getElementById('sellTargetNote').textContent = t.note;
+}
+updateSellTarget();
+
+// ============================================================
+// CELSIUS / T-FIELD PARSER
+// ============================================================
+function parseTField() {
+  const raw = document.getElementById('tFieldInput').value.trim();
+  const boundary = parseFloat(document.getElementById('bracketBoundaryInput').value) || null;
+  const el = document.getElementById('tFieldResult');
+
+  // T-field format: T0261 (tenths of C, sign 0=pos 1=neg) + dewpoint
+  // e.g. T02610128 = temp 26.1°C, dew 12.8°C
+  const match = raw.match(/T(\d)(\d{3})(\d)(\d{3})/);
+  if (!match) {
+    el.style.display = 'block';
+    el.innerHTML = '<span style="color:var(--danger); font-size:12px;">Invalid T-field format. Expected: T02610128</span>';
+    return;
+  }
+
+  const tempSign = match[1] === '1' ? -1 : 1;
+  const tempC = tempSign * parseInt(match[2]) / 10;
+  const tempF = tempC * 9/5 + 32;
+  const dewSign = match[3] === '1' ? -1 : 1;
+  const dewC = dewSign * parseInt(match[4]) / 10;
+  const dewF = dewC * 9/5 + 32;
+
+  let boundaryHtml = '';
+  if (boundary !== null) {
+    const diff = Math.abs(tempF - boundary);
+    const diffC = Math.abs(tempC - (boundary - 32) * 5/9);
+    if (diffC <= 0.5) {
+      boundaryHtml = `<div class="celsius-boundary">⚠ BOUNDARY RISK — ${tempC.toFixed(1)}°C is within 0.5°C of ${boundary}°F boundary (diff: ${diffC.toFixed(1)}°C / ${diff.toFixed(1)}°F)</div>`;
+    } else if (tempF < boundary) {
+      boundaryHtml = `<div class="celsius-safe">✓ SAFE — ${tempC.toFixed(1)}°C = ${tempF.toFixed(1)}°F — below ${boundary}°F boundary (margin: ${diff.toFixed(1)}°F / ${diffC.toFixed(1)}°C)</div>`;
+    } else {
+      boundaryHtml = `<div class="celsius-boundary">⚠ OVER BOUNDARY — ${tempC.toFixed(1)}°C = ${tempF.toFixed(1)}°F — above ${boundary}°F</div>`;
+    }
+  }
+
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="card-label">T-field: ${raw}</div>
+    <div>
+      <span class="celsius-val" style="color:var(--warn);">${tempC.toFixed(1)}°C</span>
+      <span class="celsius-f">= ${tempF.toFixed(1)}°F</span>
+    </div>
+    <div style="font-size:11px; color:var(--text2); margin-top:4px;">Dewpoint: ${dewC.toFixed(1)}°C (${dewF.toFixed(1)}°F)</div>
+    ${boundaryHtml}
+    <div style="font-size:10px; color:var(--text3); margin-top:8px;">KNYC: Kalshi resolves on official NWS CLI (KNYC ASOS hourly). A single hourly reading can trigger resolution.</div>
+  `;
+}
+
+// ============================================================
+// MONITOR
+// ============================================================
+async function fetchMonitorData() {
+  const icao = document.getElementById('monitorStation').value;
+  const statusEl = document.getElementById('monitorStatus');
+  statusEl.textContent = 'Fetching METAR...';
+
+  try {
+    const url = `https://aviationweather.gov/api/data/metar?ids=${icao}&format=decoded&taf=false`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+
+    const tempMatch = text.match(/Temperature:\s*([\d.]+)\s*C\s*\(([\d.]+)\s*F\)/i);
+    const windMatch = text.match(/Wind:\s*([^\n]+)/i);
+    const timeMatch = text.match(/(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})/);
+    const gustMatch = text.match(/gusts?\s+to\s+(\d+)/i);
+
+    if (tempMatch) {
+      const tempF = parseFloat(tempMatch[2]);
+      const tempC = parseFloat(tempMatch[1]);
+      const timeStr = timeMatch ? timeMatch[1] : new Date().toISOString().slice(0,16);
+      const wind = windMatch ? windMatch[1].trim() : 'Unknown';
+      const gusts = gustMatch ? parseInt(gustMatch[1]) : null;
+
+      addMetarReading({ time: timeStr, tempF, tempC, wind, gusts, raw: text.slice(0, 200) });
+      statusEl.innerHTML = `<span style="color:var(--success);">✓ Live: ${tempF.toFixed(1)}°F (${tempC.toFixed(1)}°C)</span>`;
+
+      // T-field for NYC
+      if (icao === 'KNYC') {
+        const tFieldMatch = text.match(/T\d{8}/);
+        if (tFieldMatch) {
+          checkNYCBoundary(tempC);
+        }
+      }
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--warn);">⚠ Could not parse temp from response</span>`;
+      addMetarReading({ time: new Date().toISOString().slice(0,16), tempF: null, tempC: null, wind: 'Unknown', gusts: null, raw: text.slice(0,200) });
+    }
+  } catch(e) {
+    statusEl.innerHTML = `<span style="color:var(--danger);">✗ ${e.message} — use Sources tab for manual lookup</span>`;
+  }
+}
+
+function addMetarReading(reading) {
+  metarHistory.unshift(reading);
+  if (metarHistory.length > 10) metarHistory.pop();
+  renderMetarHistory();
+  computeSignal();
+}
+
+function addManualReading() {
+  const time = document.getElementById('manualTime').value.trim();
+  const tempF = parseFloat(document.getElementById('manualTemp').value);
+  const wind = document.getElementById('manualWind').value.trim();
+
+  if (!time || isNaN(tempF)) return;
+
+  manualReadings.unshift({ time, tempF, tempC: (tempF - 32) * 5/9, wind, gusts: null });
+  if (manualReadings.length > 10) manualReadings.pop();
+
+  document.getElementById('manualTime').value = '';
+  document.getElementById('manualTemp').value = '';
+  document.getElementById('manualWind').value = '';
+
+  renderManualHistory();
+  computeSignalFromManual();
+}
+
+function clearReadings() {
+  manualReadings = [];
+  renderManualHistory();
+  computeSignalFromManual();
+}
+
+function renderMetarHistory() {
+  const el = document.getElementById('metar-history');
+  if (!metarHistory.length) {
+    el.innerHTML = '<div style="color:var(--text3); font-size:12px; padding:8px 0;">No readings yet.</div>';
+    return;
+  }
+  const last3 = metarHistory.slice(0, 3);
+  el.innerHTML = last3.map((r, i) => {
+    const tempStr = r.tempF !== null ? `${r.tempF.toFixed(1)}°F` : '—';
+    let trendClass = 'flat', trendIcon = '→';
+    if (i < last3.length - 1 && r.tempF !== null && last3[i+1].tempF !== null) {
+      const diff = r.tempF - last3[i+1].tempF;
+      if (diff > 0.5) { trendClass = 'up'; trendIcon = '↑'; }
+      else if (diff < -0.5) { trendClass = 'down'; trendIcon = '↓'; }
+    }
+    return `<div class="metar-line ${i === 0 ? 'latest' : ''}">
+      <span class="metar-time">${r.time}</span>
+      <span class="metar-temp ${trendClass}">${tempStr}</span>
+      <span class="metar-wind">${r.wind}${r.gusts ? ` G${r.gusts}kt` : ''}</span>
+      ${i === 0 ? '<span class="badge badge-blue" style="margin-left:4px; font-size:9px;">LATEST</span>' : ''}
+      <span class="metar-trend">${trendIcon}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderManualHistory() {
+  const el = document.getElementById('manualHistory');
+  if (!manualReadings.length) {
+    el.innerHTML = '<div style="color:var(--text3); font-size:12px; padding:4px 0;">No manual readings.</div>';
+    document.getElementById('gustCheck').textContent = 'Enter 3 readings above to auto-check gust contamination.';
+    return;
+  }
+  const last3 = manualReadings.slice(0, 3);
+  el.innerHTML = last3.map((r, i) => {
+    let trendClass = 'flat', trendIcon = '→';
+    if (i < last3.length - 1) {
+      const diff = r.tempF - last3[i+1].tempF;
+      if (diff > 0.5) { trendClass = 'up'; trendIcon = '↑'; }
+      else if (diff < -0.5) { trendClass = 'down'; trendIcon = '↓'; }
+    }
+    return `<div class="metar-line ${i === 0 ? 'latest' : ''}">
+      <span class="metar-time">${r.time}</span>
+      <span class="metar-temp ${trendClass}">${r.tempF.toFixed(1)}°F</span>
+      <span class="metar-wind">${r.wind || '—'}</span>
+      <span class="metar-trend">${trendIcon}</span>
+    </div>`;
+  }).join('');
+
+  // Gust contamination check
+  if (last3.length >= 3) {
+    const temps = last3.map(r => r.tempF);
+    const maxSwing = Math.max(...temps) - Math.min(...temps);
+    const el2 = document.getElementById('gustCheck');
+    if (maxSwing > 3) {
+      el2.innerHTML = `<span style="color:var(--warn);">⚠ SPIKE DETECTED: ${maxSwing.toFixed(1)}°F swing across readings. If from a single gust — NOT a bracket change. Wait for 3 consecutive readings before acting.</span>`;
+    } else {
+      el2.innerHTML = `<span style="color:var(--success);">✓ No gust contamination spike (${maxSwing.toFixed(1)}°F range — stable)</span>`;
+    }
+  }
+}
+
+function computeSignal() {
+  const bracketLow = parseFloat(document.getElementById('monitorBracketLow').value);
+  const bracketHigh = parseFloat(document.getElementById('monitorBracketHigh').value);
+  const cityType = document.getElementById('monitorCityType').value;
+
+  const last3 = metarHistory.slice(0, 3);
+  if (last3.length < 1 || last3[0].tempF === null) return;
+
+  doSignal(last3, bracketLow, bracketHigh, cityType);
+}
+
+function computeSignalFromManual() {
+  const bracketLow = parseFloat(document.getElementById('monitorBracketLow').value);
+  const bracketHigh = parseFloat(document.getElementById('monitorBracketHigh').value);
+  const cityType = document.getElementById('monitorCityType').value;
+  doSignal(manualReadings.slice(0, 3), bracketLow, bracketHigh, cityType);
+}
+
+function doSignal(readings, bracketLow, bracketHigh, cityType) {
+  const signalEl = document.getElementById('signalDisplay');
+  const noteEl = document.getElementById('signalNote');
+  const reversalEl = document.getElementById('reversalAlert');
+
+  if (!readings.length || isNaN(bracketLow) || isNaN(bracketHigh)) {
+    signalEl.className = 'signal-box signal-wait';
+    signalEl.textContent = 'Enter bracket bounds';
+    noteEl.textContent = '';
+    return;
+  }
+
+  const latest = readings[0].tempF;
+  const inBracket = latest >= bracketLow && latest < bracketHigh;
+  const above = latest >= bracketHigh;
+  const below = latest < bracketLow;
+
+  // Check for peak reversal (3 readings, drop 2°F+, gusts increasing)
+  let reversalDetected = false;
+  if (readings.length >= 3) {
+    const drops = readings[0].tempF - readings[2].tempF;
+    const gustIncreasing = readings[0].gusts !== null && readings[2].gusts !== null && readings[0].gusts > readings[2].gusts;
+    if (drops <= -2 && (gustIncreasing || drops <= -3)) {
+      reversalDetected = true;
+    }
+  }
+  reversalEl.style.display = reversalDetected ? 'flex' : 'none';
+
+  // Sell target for this city type
+  const sellTarget = SELL_TARGETS[cityType];
+
+  let signal, cls, note;
+  if (above) {
+    signal = 'BUSTED — Temp above bracket';
+    cls = 'signal-sell';
+    note = `Current ${latest.toFixed(1)}°F is ABOVE ${bracketHigh}°F bracket ceiling. Position is out of range — consider cutting losses or checking if Kalshi has repriced.`;
+  } else if (inBracket) {
+    signal = 'IN BRACKET — Hold / Watch';
+    cls = 'signal-hold';
+    note = `Current ${latest.toFixed(1)}°F is inside ${bracketLow}–${bracketHigh}°F. Sell target for ${sellTarget.label}: ${sellTarget.val}. ${sellTarget.note}`;
+  } else {
+    signal = 'BELOW BRACKET — Wait';
+    cls = 'signal-wait';
+    note = `Current ${latest.toFixed(1)}°F is below ${bracketLow}°F bracket floor. Temp needs to rise ${(bracketLow - latest).toFixed(1)}°F to enter bracket.`;
+  }
+
+  if (reversalDetected) {
+    signal = '⚠ REVERSAL — Consider Exit';
+    cls = 'signal-sell';
+  }
+
+  signalEl.className = `signal-box ${cls}`;
+  signalEl.textContent = signal;
+  noteEl.textContent = note;
+}
+
+function checkNYCBoundary(tempC) {
+  const bracketLow = parseFloat(document.getElementById('monitorBracketLow').value);
+  const bracketHigh = parseFloat(document.getElementById('monitorBracketHigh').value);
+  const alertEl = document.getElementById('nycBoundaryAlert');
+  const msgEl = document.getElementById('nycBoundaryMsg');
+
+  if (isNaN(bracketHigh)) { alertEl.style.display = 'none'; return; }
+  const boundaryC = (bracketHigh - 32) * 5/9;
+  const diff = Math.abs(tempC - boundaryC);
+
+  if (diff <= 0.5) {
+    alertEl.style.display = 'flex';
+    msgEl.textContent = `NYC boundary risk: T-field shows ${tempC.toFixed(1)}°C, which is within 0.5°C of ${bracketHigh}°F ceiling. Single hourly reading can trigger resolution.`;
+  } else {
+    alertEl.style.display = 'none';
+  }
+}
+
+// ============================================================
+// SOURCES TAB
+// ============================================================
+function copyToClipboard(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy URL'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function openUrl(url) {
+  window.open(url, '_blank');
+}
+
+function renderSources() {
+  const el = document.getElementById('sourcesContainer');
+
+  const rows = Object.entries(CITIES).map(([icao, c]) => {
+    const links = [];
+
+    links.push({ label: 'NWS 5-min Tabular', url: c.tabular });
+    links.push({ label: 'METAR (tgftp.nws.noaa.gov)', url: c.metar });
+    if (c.fiveMin) links.push({ label: 'NWS Timeseries (5-min)', url: c.fiveMin });
+    links.push({ label: 'Wunderground Hourly', url: c.wunderground + new Date().toISOString().slice(0,10).replace(/-/g, '/') });
+    links.push({ label: 'NWS Point Forecast', url: c.nwsPoint });
+    if (c.mesonet) links.push({ label: 'NY Mesonet Manhattan', url: c.mesonet });
+
+    const typeLabels = { smooth: 'Smooth Sailing', marine: 'Marine Layer', coastal: 'Coastal Swing', storm: 'Storm City' };
+    const typeBadge = { smooth: 'badge-blue', marine: 'badge-info', coastal: 'badge-purple', storm: 'badge-red' };
+
+    return `<div class="source-city">
+      <div class="source-city-header">
+        📂 ${c.name}
+        <span class="source-city-icao">${icao}</span>
+        <span class="badge ${typeBadge[c.type]}" style="margin-left:auto; font-size:9px;">${typeLabels[c.type]}</span>
+      </div>
+      ${links.map(l => `
+        <div class="source-link">
+          <span>${l.label}</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="copy-btn-small" onclick="copyToClipboard('${l.url}', this)">📋 Copy URL</button>
+            <span class="source-link-icon" onclick="openUrl('${l.url}')" style="cursor:pointer; color:var(--accent);">↗</span>
+          </div>
+        </div>
+      `).join('')}
+      <div class="source-link" style="background:var(--surface2);">
+        <span style="color:var(--text2);">AFD</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="copy-btn-small" onclick="copyToClipboard('${c.afd}', this)">📋 Copy AFD URL</button>
+          <span class="source-link-icon" onclick="openUrl('${c.afd}')" style="cursor:pointer; color:var(--accent);">↗</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = rows;
+}
+
+// Init
+renderMetarHistory();
+renderManualHistory();
+</script>
+</body>
+</html>
